@@ -48,6 +48,7 @@ const YouTubeService = {
 
                     const canal = canalResponse.data.items[0];
                     const imagenCanal = canal?.snippet?.thumbnails?.default?.url || null;
+                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
 
                     // Retornar con formato unificado
                     return {
@@ -60,6 +61,7 @@ const YouTubeService = {
                         likes: video.statistics.likeCount,
                         duracion: video.contentDetails.duration,
                         canalImagen: imagenCanal,
+                        publicado,
                     };
                 })
             );
@@ -99,6 +101,7 @@ const YouTubeService = {
 
             const canal = canalResponse.data.items[0];
             const imagenCanal = canal?.snippet?.thumbnails?.default?.url || null;
+            const publicado = video.snippet.publishedAt?.split("T")[0] || "";
 
             // Devolver los datos completos
             return {
@@ -111,6 +114,7 @@ const YouTubeService = {
                 likes: video.statistics.likeCount,
                 duracion: video.contentDetails.duration,
                 canalImagen: imagenCanal,
+                publicado
             };
         } catch (error) {
             throw new Error("No se pudo obtener el video de YouTube");
@@ -170,6 +174,7 @@ const YouTubeService = {
 
                     const canal = canalResponse.data.items[0];
                     const canalImagen = canal?.snippet?.thumbnails?.default?.url || null;
+                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
 
                     // Estructura unificada
                     return {
@@ -183,6 +188,7 @@ const YouTubeService = {
                         duracion: video.contentDetails.duration,
                         canalImagen,
                         ubicacion: { lat, lon, radio },
+                        publicado
                     };
                 })
             );
@@ -246,6 +252,7 @@ const YouTubeService = {
 
                     const canal = canalResponse.data.items[0];
                     const canalImagen = canal?.snippet?.thumbnails?.default?.url || null;
+                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
 
                     // Retornar en formato uniforme
                     return {
@@ -259,6 +266,7 @@ const YouTubeService = {
                         duracion: video.contentDetails.duration,
                         canalImagen,
                         ubicacion: { lat, lon, radio },
+                        publicado
                     };
                 })
             );
