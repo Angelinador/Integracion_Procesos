@@ -91,6 +91,7 @@ const YouTubeService = {
                 id: item.id.videoId,
                 titulo: item.snippet.title,
                 descripcion: item.snippet.description,
+                idCanal: item.snippet.channelId,
                 canal: item.snippet.channelTitle,
                 miniatura: item.snippet.thumbnails?.medium?.url,
                 publicado: item.snippet.publishedAt,

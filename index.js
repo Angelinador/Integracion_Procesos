@@ -48,7 +48,7 @@ sequelize
     await Historial.sync();
     await VideoReferencia.sync();
 
-    asignarRelaciones
+    asignarRelaciones()
     console.log("base de datos sincronizada");
   })
   .catch((err) => console.error("error al sincronizar:", err));
