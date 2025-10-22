@@ -39,7 +39,7 @@ app.use("/api", logRoute);
 app.use("/api/usuarios", userRoute);
 app.use("/api/historiales", validarToken, recordRoute);
 app.use("/api/referencias", validarToken, videoReferenceRoute);
-app.use("/api/youtube", youtubeRoutes);
+app.use("/api/youtube", validarToken, youtubeRoutes);
 
 sequelize
   .sync({ alter: true })
