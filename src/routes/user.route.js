@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/", crearUsuario);
 router.get("/", encontrarUsuarios);
-router.delete("/id/", encontrarIdUsuario);
+router.delete("/id", encontrarIdUsuario);
 router.get("/:id", encontrarUsuario);
 router.put("/:id", actualizarUsuario);
 router.delete("/:id", eliminarUsuario);

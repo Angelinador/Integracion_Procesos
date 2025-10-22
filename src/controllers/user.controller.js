@@ -100,7 +100,8 @@ const encontrarUsuario = async (req, res) => {
 const encontrarIdUsuario = async (req, res) => {
     try {
         const { correoElectronico } = req.body;
-        
+        console.log("correo electronico", correoElectronico)
+
         const usuario = await Usuario.findOne({
             where: { correoElectronico: correoElectronico },
         });
