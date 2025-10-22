@@ -24,8 +24,6 @@ const crearHistorial = async (req, res) => {
         }
 
         // Desde el controlador se crea la llave primaria compuesta
-        // Reemplazamos los puntos (.) por % para evitar problemas en la URL
-        const sanitize = (valor) => String(valor).replaceAll('.', 'p');
         const idHistorial = `${idUsuario}_${altitud}_${latitud}`;
         // Verificamos el registro y si ya existe lo dejamos ser
         const existente = await Historial.findByPk(idHistorial);

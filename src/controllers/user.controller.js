@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const Usuario = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 
@@ -95,6 +96,32 @@ const encontrarUsuario = async (req, res) => {
         });
     }
 };
+
+const encontrarIdUsuario = async (req, res) => {
+    try {
+        const { correoElectronico } = req.params;
+
+        const usuario = await Usuario.findOne({
+            where: { correoElectronico: correoElectronico },
+        });
+
+        if (!usuario) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ success: true, data: usuario.idUsuario });
+    } catch (error) {
+        console.error("Error al buscar usuario:", error);
+        res.status(400).json({
+            success: false,
+            message: "Error, no se pudo encontrar el usuario",
+        });
+    }
+};
+
+
 
 const actualizarUsuario = async (req, res) => {
     try {
@@ -234,6 +261,7 @@ module.exports = {
     crearUsuario,
     encontrarUsuarios,
     encontrarUsuario,
+    encontrarIdUsuario,
     actualizarUsuario,
     eliminarUsuario
 };
