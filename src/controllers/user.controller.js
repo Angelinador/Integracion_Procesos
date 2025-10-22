@@ -121,8 +121,6 @@ const encontrarIdUsuario = async (req, res) => {
     }
 };
 
-
-
 const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
