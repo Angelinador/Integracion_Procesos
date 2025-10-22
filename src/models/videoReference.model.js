@@ -22,7 +22,39 @@ VideoReferencia.init(
         idVideo: {
             type: DataTypes.STRING,
             allowNull: false
-        }
+        },
+        titulo: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        descripcion: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        canal: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        miniatura: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        vistas: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        likes: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        calaImagen: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        publicado: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     {
         sequelize,

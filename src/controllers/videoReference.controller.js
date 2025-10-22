@@ -23,10 +23,7 @@ const crearVideoReferencia = async (req, res) => {
         }
 
         // Crear el registro
-        const referencia = await VideoReferencia.create({
-            idHistorial,
-            idVideo,
-        });
+        const referencia = await VideoReferencia.create(req.body);
 
         res.status(201).json({
             success: true,
