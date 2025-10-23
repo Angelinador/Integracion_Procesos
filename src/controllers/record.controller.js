@@ -27,7 +27,13 @@ const crearHistorial = async (req, res) => {
         const idHistorial = `${idUsuario}_${altitud}_${latitud}`;
         // Verificamos el registro y si ya existe lo dejamos ser
         const existente = await Historial.findByPk(idHistorial);
-        if (existente) { return }
+        if (existente) {
+            return res.status(200).json({
+                success: true,
+                message: "El historial ya existía previamente.",
+                data: existente,
+            });
+        }
         const historial = await Historial.create({
             idHistorial,
             idUsuario,

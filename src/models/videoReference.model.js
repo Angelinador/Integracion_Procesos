@@ -47,7 +47,7 @@ VideoReferencia.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
-        calaImagen: {
+        canalImagen: {
             type: DataTypes.STRING,
             allowNull: true,
         },
