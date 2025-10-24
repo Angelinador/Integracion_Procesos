@@ -28,7 +28,7 @@ VideoReferencia.init(
             allowNull: true,
         },
         descripcion: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING (270),
             allowNull: true,
         },
         canal: {

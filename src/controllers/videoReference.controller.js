@@ -3,7 +3,7 @@ const Historial = require("../models/record.model");
 
 const crearVideoReferencia = async (req, res) => {
     try {
-        const { idHistorial, idVideo } = req.body;
+        const { idHistorial, idVideo, descripcion } = req.body;
 
         // Validar campos requeridos
         if (!idHistorial || !idVideo) {
@@ -22,8 +22,17 @@ const crearVideoReferencia = async (req, res) => {
             });
         }
 
+        const MAX_LENGTH = 255;
+        const descripcionCortada =
+            descripcion && descripcion.length > MAX_LENGTH
+                ? descripcion.substring(0, MAX_LENGTH) + "..."
+                : descripcion;
+
         // Crear el registro
-        const referencia = await VideoReferencia.create(req.body);
+        const referencia = await VideoReferencia.create({
+            ...req.body,
+            descripcion: descripcionCortada,
+        });
 
         res.status(201).json({
             success: true,
