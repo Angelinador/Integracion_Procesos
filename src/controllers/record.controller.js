@@ -4,10 +4,10 @@ const { obtenerReferenciasPorHistorial } = require("../services/record.service")
 
 const crearHistorial = async (req, res) => {
     try {
-        const { idUsuario, altitud, latitud } = req.body;
+        const { idUsuario, latitud, longitud } = req.body;
 
         // Validar campos requeridos
-        if (!idUsuario || altitud === undefined || latitud === undefined) {
+        if (!idUsuario || latitud === undefined || longitud === undefined) {
             return res.status(400).json({
                 success: false,
                 message: "Faltan campos requeridos",
@@ -24,7 +24,7 @@ const crearHistorial = async (req, res) => {
         }
 
         // Desde el controlador se crea la llave primaria compuesta
-        const idHistorial = `${idUsuario}_${altitud}_${latitud}`;
+        const idHistorial = `${idUsuario}_${latitud}_${longitud}`;
         // Verificamos el registro y si ya existe lo dejamos ser
         const existente = await Historial.findByPk(idHistorial);
         if (existente) {
@@ -37,8 +37,8 @@ const crearHistorial = async (req, res) => {
         const historial = await Historial.create({
             idHistorial,
             idUsuario,
-            altitud,
             latitud,
+            longitud,
         });
         res.status(201).json({
             success: true,

@@ -11,7 +11,7 @@ Historial.init(
             primaryKey: true,
         },
 
-        // Estos tres atributos (idUsuario, altitud, latitud) son la base para el 
+        // Estos tres atributos (idUsuario, latitud, longitud) son la base para el 
         // cambio de historial dinamico en base a las coordenadas del usuario
         idUsuario: {
             type: DataTypes.INTEGER,
@@ -23,11 +23,11 @@ Historial.init(
             onDelete: "CASCADE",
             onUpdate: "CASCADE",
         },
-        altitud: {
+        latitud: {
             type: DataTypes.DECIMAL(10, 4), // [19.456700] los ultimos digitos seran para abarcar mas area
             allowNull: false,
         },
-        latitud: {
+        longitud: {
             type: DataTypes.DECIMAL(10, 4), // [19.456700] los ultimos digitos seran para abarcar mas area
             allowNull: false,
         },
