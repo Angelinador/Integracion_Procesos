@@ -125,7 +125,7 @@ const YouTubeService = {
     async buscarVideosPorUbicacion(query = "", lat, lon, radio = "10km", maxResults = 20) {
         try {
             if (!lat || !lon) {
-                throw new Error("Debes proporcionar coordenadas válidas (lat y lon)");
+                throw new Error("Debes proporcionar coordenadas válidas");
             }
 
             // Buscar videos cercanos
@@ -206,8 +206,7 @@ const YouTubeService = {
                 throw new Error("Debes proporcionar coordenadas válidas (lat y lon)");
             }
 
-            console.log("📍 Coordenadas recibidas:", lat, lon);
-
+            // Buscar videos más populares por vista en la ubicación
             const searchResponse = await axios.get(`${BASE_URL}/search`, {
                 params: {
                     part: "snippet",
@@ -220,14 +219,15 @@ const YouTubeService = {
                 },
             });
 
-            console.log("✅ searchResponse.status:", searchResponse.status);
-
             if (!searchResponse.data?.items?.length) {
-                console.warn("⚠️ No se encontraron videos populares para la ubicación");
+                console.warn("No se encontraron videos populares para la ubicación");
                 return [];
             }
 
+            // Extraer IDs de los videos
             const videoIds = searchResponse.data.items.map((item) => item.id.videoId).join(",");
+
+            // Obtener detalles y estadísticas
             const videosResponse = await axios.get(`${BASE_URL}/videos`, {
                 params: {
                     part: "snippet,statistics,contentDetails",
@@ -236,26 +236,44 @@ const YouTubeService = {
                 },
             });
 
+            // Mapear datos con estructura unificada
             const videos = await Promise.all(
                 videosResponse.data.items.map(async (video) => {
                     const channelId = video.snippet.channelId;
+
+                    // Obtener imagen del canal
                     const canalResponse = await axios.get(`${BASE_URL}/channels`, {
-                        params: { part: "snippet", id: channelId, key: YOUTUBE_API_KEY },
+                        params: {
+                            part: "snippet",
+                            id: channelId,
+                            key: YOUTUBE_API_KEY,
+                        },
                     });
+
                     const canal = canalResponse.data.items[0];
+                    const canalImagen = canal?.snippet?.thumbnails?.default?.url || null;
+                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
+
+                    // Estructura igual que el primer servicio
                     return {
                         id: video.id,
                         titulo: video.snippet.title,
+                        descripcion: video.snippet.description || "",
                         canal: video.snippet.channelTitle,
                         miniatura: video.snippet.thumbnails.high?.url,
-                        canalImagen: canal?.snippet?.thumbnails?.default?.url,
+                        vistas: video.statistics.viewCount || "0",
+                        likes: video.statistics.likeCount || "0",
+                        duracion: video.contentDetails.duration || "",
+                        canalImagen,
+                        ubicacion: { lat, lon, radio },
+                        publicado,
                     };
                 })
             );
 
             return videos;
         } catch (error) {
-            console.error("❌ Error real de YouTube API:", {
+            console.error("Error de YouTube API:", {
                 status: error.response?.status,
                 data: error.response?.data,
                 message: error.message,
