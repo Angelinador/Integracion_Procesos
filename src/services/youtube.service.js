@@ -206,28 +206,28 @@ const YouTubeService = {
                 throw new Error("Debes proporcionar coordenadas válidas (lat y lon)");
             }
 
-            // Buscar videos más vistos en la zona
+            console.log("📍 Coordenadas recibidas:", lat, lon);
+
             const searchResponse = await axios.get(`${BASE_URL}/search`, {
                 params: {
                     part: "snippet",
                     type: "video",
                     location: `${lat},${lon}`,
                     locationRadius: radio,
-                    order: "viewCount", // ordenar por vistas
+                    order: "viewCount",
                     maxResults,
                     key: YOUTUBE_API_KEY,
                 },
             });
 
+            console.log("✅ searchResponse.status:", searchResponse.status);
+
             if (!searchResponse.data?.items?.length) {
-                console.warn("No se encontraron videos populares para la ubicación");
+                console.warn("⚠️ No se encontraron videos populares para la ubicación");
                 return [];
             }
 
-            // Obtener IDs de los videos encontrados
             const videoIds = searchResponse.data.items.map((item) => item.id.videoId).join(",");
-
-            // Obtener estadísticas (likes, vistas, duración)
             const videosResponse = await axios.get(`${BASE_URL}/videos`, {
                 params: {
                     part: "snippet,statistics,contentDetails",
@@ -236,46 +236,33 @@ const YouTubeService = {
                 },
             });
 
-            // Combinar información del video y del canal
             const videos = await Promise.all(
                 videosResponse.data.items.map(async (video) => {
                     const channelId = video.snippet.channelId;
-
-                    // Obtener imagen del canal
                     const canalResponse = await axios.get(`${BASE_URL}/channels`, {
-                        params: {
-                            part: "snippet",
-                            id: channelId,
-                            key: YOUTUBE_API_KEY,
-                        },
+                        params: { part: "snippet", id: channelId, key: YOUTUBE_API_KEY },
                     });
-
                     const canal = canalResponse.data.items[0];
-                    const canalImagen = canal?.snippet?.thumbnails?.default?.url || null;
-                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
-
-                    // Retornar en formato uniforme
                     return {
                         id: video.id,
                         titulo: video.snippet.title,
-                        descripcion: video.snippet.description,
                         canal: video.snippet.channelTitle,
                         miniatura: video.snippet.thumbnails.high?.url,
-                        vistas: video.statistics.viewCount,
-                        likes: video.statistics.likeCount,
-                        duracion: video.contentDetails.duration,
-                        canalImagen,
-                        ubicacion: { lat, lon, radio },
-                        publicado
+                        canalImagen: canal?.snippet?.thumbnails?.default?.url,
                     };
                 })
             );
 
             return videos;
         } catch (error) {
+            console.error("❌ Error real de YouTube API:", {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message,
+            });
             throw new Error("No se pudieron obtener videos populares");
         }
-    },
+    }
 
 };
 
