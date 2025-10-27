@@ -9,21 +9,25 @@ const YouTubeService = {
     // Busqueda de videos por palabras claves
     async buscarVideos(query, maxResults = 20) {
         try {
-            // Buscar videos por palabras clave
+            // Buscar videos por texto
             const searchResponse = await axios.get(`${BASE_URL}/search`, {
                 params: {
                     part: "snippet",
                     q: query,
                     maxResults,
-                    key: YOUTUBE_API_KEY,
                     type: "video",
+                    key: YOUTUBE_API_KEY,
                 },
             });
 
-            // Extraer IDs de los videos
-            const videoIds = searchResponse.data.items.map((item) => item.id.videoId).join(",");
+            const items = searchResponse.data?.items || [];
+            if (items.length === 0) return [];
 
-            // Obtener estadísticas y duración
+            // Extraer IDs de video y canal (únicos)
+            const videoIds = items.map((item) => item.id.videoId).join(",");
+            const uniqueChannelIds = [...new Set(items.map((item) => item.snippet.channelId))].join(",");
+
+            // Obtener datos y estadísticas de videos
             const videosResponse = await axios.get(`${BASE_URL}/videos`, {
                 params: {
                     part: "snippet,statistics,contentDetails",
@@ -32,46 +36,44 @@ const YouTubeService = {
                 },
             });
 
-            // Obtener detalles completos (incluyendo imagen del canal)
-            const videos = await Promise.all(
-                videosResponse.data.items.map(async (video) => {
-                    const channelId = video.snippet.channelId;
+            // Obtener información de canales (solo una llamada)
+            const channelsResponse = await axios.get(`${BASE_URL}/channels`, {
+                params: {
+                    part: "snippet",
+                    id: uniqueChannelIds,
+                    key: YOUTUBE_API_KEY,
+                },
+            });
 
-                    // Obtener imagen del canal
-                    const canalResponse = await axios.get(`${BASE_URL}/channels`, {
-                        params: {
-                            part: "snippet",
-                            id: channelId,
-                            key: YOUTUBE_API_KEY,
-                        },
-                    });
-
-                    const canal = canalResponse.data.items[0];
-                    const imagenCanal = canal?.snippet?.thumbnails?.default?.url || null;
-                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
-
-                    // Retornar con formato unificado
-                    return {
-                        id: video.id,
-                        titulo: video.snippet.title,
-                        descripcion: video.snippet.description,
-                        canal: video.snippet.channelTitle,
-                        miniatura: video.snippet.thumbnails.high.url,
-                        vistas: video.statistics.viewCount,
-                        likes: video.statistics.likeCount,
-                        duracion: video.contentDetails.duration,
-                        canalImagen: imagenCanal,
-                        publicado,
-                    };
-                })
+            // Crear un mapa de canalId → imagen
+            const canalesMap = new Map(
+                channelsResponse.data.items.map((ch) => [
+                    ch.id,
+                    ch.snippet?.thumbnails?.default?.url || null,
+                ])
             );
+
+            // Unificar datos de videos
+            const videos = videosResponse.data.items.map((video) => ({
+                id: video.id,
+                titulo: video.snippet.title,
+                descripcion: video.snippet.description || "",
+                canal: video.snippet.channelTitle,
+                miniatura: video.snippet.thumbnails?.high?.url || null,
+                vistas: parseInt(video.statistics?.viewCount || 0, 10),
+                likes: parseInt(video.statistics?.likeCount || 0, 10),
+                duracion: video.contentDetails?.duration || "",
+                canalImagen: canalesMap.get(video.snippet.channelId) || null,
+                publicado: video.snippet.publishedAt?.split("T")[0] || "",
+            }));
 
             return videos;
         } catch (error) {
+            console.error("Error en buscarVideos:", error.response?.data || error.message);
             throw new Error("No se pudieron obtener videos de YouTube");
         }
     },
-
+    
     // Obtencion de info de video por ID
     async obtenerVideoPorId(videoId) {
         try {
