@@ -206,28 +206,29 @@ const YouTubeService = {
                 throw new Error("Debes proporcionar coordenadas válidas (lat y lon)");
             }
 
-            // Buscar videos más populares por vista en la ubicación
+            // Buscar videos cercanos (sin confiar en order=viewCount)
             const searchResponse = await axios.get(`${BASE_URL}/search`, {
                 params: {
                     part: "snippet",
                     type: "video",
                     location: `${lat},${lon}`,
                     locationRadius: radio,
-                    order: "viewCount",
                     maxResults,
                     key: YOUTUBE_API_KEY,
                 },
             });
 
-            if (!searchResponse.data?.items?.length) {
+            const items = searchResponse.data?.items || [];
+            if (!items.length) {
                 console.warn("No se encontraron videos populares para la ubicación");
                 return [];
             }
 
-            // Extraer IDs de los videos
-            const videoIds = searchResponse.data.items.map((item) => item.id.videoId).join(",");
+            // Obtener IDs de video y de canal únicos
+            const videoIds = items.map((item) => item.id.videoId).join(",");
+            const channelIds = [...new Set(items.map((item) => item.snippet.channelId))].join(",");
 
-            // Obtener detalles y estadísticas
+            // 3️⃣ Obtener estadísticas de videos (vistas, likes, duración)
             const videosResponse = await axios.get(`${BASE_URL}/videos`, {
                 params: {
                     part: "snippet,statistics,contentDetails",
@@ -236,44 +237,43 @@ const YouTubeService = {
                 },
             });
 
-            // Mapear datos con estructura unificada
-            const videos = await Promise.all(
-                videosResponse.data.items.map(async (video) => {
-                    const channelId = video.snippet.channelId;
+            // Obtener datos de canales (en una sola petición)
+            const channelsResponse = await axios.get(`${BASE_URL}/channels`, {
+                params: {
+                    part: "snippet",
+                    id: channelIds,
+                    key: YOUTUBE_API_KEY,
+                },
+            });
 
-                    // Obtener imagen del canal
-                    const canalResponse = await axios.get(`${BASE_URL}/channels`, {
-                        params: {
-                            part: "snippet",
-                            id: channelId,
-                            key: YOUTUBE_API_KEY,
-                        },
-                    });
-
-                    const canal = canalResponse.data.items[0];
-                    const canalImagen = canal?.snippet?.thumbnails?.default?.url || null;
-                    const publicado = video.snippet.publishedAt?.split("T")[0] || "";
-
-                    // Estructura igual que el primer servicio
-                    return {
-                        id: video.id,
-                        titulo: video.snippet.title,
-                        descripcion: video.snippet.description || "",
-                        canal: video.snippet.channelTitle,
-                        miniatura: video.snippet.thumbnails.high?.url,
-                        vistas: video.statistics.viewCount || "0",
-                        likes: video.statistics.likeCount || "0",
-                        duracion: video.contentDetails.duration || "",
-                        canalImagen,
-                        ubicacion: { lat, lon, radio },
-                        publicado,
-                    };
-                })
+            const canalesMap = new Map(
+                channelsResponse.data.items.map((ch) => [
+                    ch.id,
+                    ch.snippet.thumbnails?.default?.url || null,
+                ])
             );
+
+            // Unificar, limpiar y ordenar por vistas
+            const videos = videosResponse.data.items
+                .map((video) => ({
+                    id: video.id,
+                    titulo: video.snippet.title,
+                    descripcion: video.snippet.description || "",
+                    canal: video.snippet.channelTitle,
+                    miniatura: video.snippet.thumbnails?.high?.url || null,
+                    vistas: parseInt(video.statistics.viewCount || "0", 10),
+                    likes: parseInt(video.statistics.likeCount || "0", 10),
+                    duracion: video.contentDetails?.duration || "",
+                    canalImagen: canalesMap.get(video.snippet.channelId) || null,
+                    ubicacion: { lat, lon, radio },
+                    publicado: video.snippet.publishedAt?.split("T")[0] || "",
+                }))
+                // Ordenamiento manual
+                .sort((a, b) => b.vistas - a.vistas);
 
             return videos;
         } catch (error) {
-            console.error("Error de YouTube API:", {
+            console.error("Error al buscar videos populares:", {
                 status: error.response?.status,
                 data: error.response?.data,
                 message: error.message,
