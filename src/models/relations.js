@@ -1,3 +1,4 @@
+const Imagen = require("./image.model");
 const Historial = require("./record.model");
 const Usuario = require("./user.model");
 const VideoReferencia = require("./videoReference.model");
@@ -23,5 +24,16 @@ module.exports = () => {
     Historial.hasMany(VideoReferencia, {
         foreignKey: "idHistorial",
         as: "referencias",
+    });
+
+    // Usuario (1...1) [1:1] (1...1) Imagen
+    Usuario.hasOne(Imagen, {
+        foreignKey: "idUsuario",
+        as: "perfil"
+    });
+
+    Imagen.belongsTo(Usuario, {
+        foreignKey: "idUsuario",
+        as: "usuario"
     });
 };

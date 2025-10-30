@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const Imagen = require("../models/image.model");
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "clave_secreta_temporal";
 
@@ -18,7 +19,15 @@ const generar = async (req, res) => {
         }
 
         // Buscar usuario por correo
-        const usuario = await Usuario.findOne({ where: { correoElectronico } });
+        const usuario = await Usuario.findOne({
+            where: { correoElectronico },
+            include: {
+                model: Imagen,
+                as: "perfil",
+                attributes: ["nombreArchivo", "ruta"],
+            },
+        });
+
         if (!usuario) {
             return res.status(404).json({
                 success: false,
@@ -62,6 +71,10 @@ const generar = async (req, res) => {
                 idUsuario: usuario.idUsuario,
                 nombres: usuario.nombres,
                 correoElectronico: usuario.correoElectronico,
+                imagen: usuario.perfil ? {
+                    nombreArchivo: usuario.perfil.nombreArchivo,
+                    ruta: usuario.perfil.ruta,
+                } : null,
             },
         });
     } catch (error) {

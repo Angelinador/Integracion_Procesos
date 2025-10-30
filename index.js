@@ -2,6 +2,7 @@ const express = require("express");
 const sequelize = require("./db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const path = require("path");
 
 // rutas
 const {
@@ -9,7 +10,8 @@ const {
   recordRoute,
   logRoute,
   videoReferenceRoute,
-  youtubeRoutes
+  youtubeRoutes,
+  imageRoutes
 } = require("./src/routes/index.route");
 
 // modelos
@@ -35,11 +37,16 @@ app.listen(3000, () => {
 });
 
 // endpoints
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use("/api", logRoute);
 app.use("/api/usuarios", userRoute);
 app.use("/api/historiales", validarToken, recordRoute);
 app.use("/api/referencias", validarToken, videoReferenceRoute);
 app.use("/api/youtube", validarToken, youtubeRoutes);
+app.use("/api/images", validarToken, imageRoutes);
+
+router.post("/auth/google", googleAuthController);
 
 sequelize
   .sync({ alter: true })
