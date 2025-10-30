@@ -73,7 +73,6 @@ const generar = async (req, res) => {
                 correoElectronico: usuario.correoElectronico,
                 imagen: usuario.perfil ? {
                     nombreArchivo: usuario.perfil.nombreArchivo,
-                    ruta: usuario.perfil.ruta,
                 } : null,
             },
         });

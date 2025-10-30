@@ -11,7 +11,8 @@ const {
   logRoute,
   videoReferenceRoute,
   youtubeRoutes,
-  imageRoutes
+  imageRoutes,
+  googleRoute
 } = require("./src/routes/index.route");
 
 // modelos
@@ -37,7 +38,7 @@ app.listen(3000, () => {
 });
 
 // endpoints
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
 
 app.use("/api", logRoute);
 app.use("/api/usuarios", userRoute);
@@ -46,7 +47,7 @@ app.use("/api/referencias", validarToken, videoReferenceRoute);
 app.use("/api/youtube", validarToken, youtubeRoutes);
 app.use("/api/images", validarToken, imageRoutes);
 
-router.post("/auth/google", googleAuthController);
+//router.post("/auth/google", googleRoute);
 
 sequelize
   .sync({ alter: true })

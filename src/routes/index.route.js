@@ -4,6 +4,7 @@ const logRoute = require("./log.route");
 const videoReferenceRoute = require("./videoReference.route")
 const youtubeRoutes = require("./youtube.route")
 const imageRoutes = require("./image.route")
+const googleRoute = require("./googleAuth.route")
 
 module.exports = {
   userRoute,
@@ -11,5 +12,6 @@ module.exports = {
   logRoute,
   videoReferenceRoute,
   youtubeRoutes,
-  imageRoutes
+  imageRoutes,
+  googleRoute
 };
